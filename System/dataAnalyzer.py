@@ -61,9 +61,9 @@ class AudioAnalyzer:
                 
     
     def detectFirstMovement(self, mag_data, rangeOfInterest):
-        if max(rangeOfInterest) < 5:
-            print("speaker is off " + str(time.time()))
-            return
+        # if max(rangeOfInterest) < 1:
+        #     print("speaker is off " + str(time.time()))
+        #     return
         
         # return if the frequency change is caused by noise (present in all frequency)
         noiseThreshold = 0.5
@@ -73,7 +73,7 @@ class AudioAnalyzer:
             return      
           
         # detect if there is a movement
-        movementThreshold = 0.25
+        movementThreshold = 0.15
         if  np.average(rangeOfInterest[0: self.radiusOfInterest-3]) > movementThreshold:
             self.gesture.state["firstUp"] = True
             self.gesture.lastMovedTime = time.time()
@@ -98,7 +98,7 @@ class AudioAnalyzer:
             return
         
         # check if there is a second movement
-        movementThreshold = 0.15
+        movementThreshold = 0.10
         up = np.average(rangeOfInterest[0: self.radiusOfInterest-3] > movementThreshold)
         down = np.average(rangeOfInterest[self.radiusOfInterest+4: 2*self.radiusOfInterest+1] > movementThreshold)
         

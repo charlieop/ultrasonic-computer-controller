@@ -19,7 +19,7 @@ print("\n\n==========\ninitiallizing...\n==========\n")
 
 # start playing the single frequency sound
 player = AudioPlayer()
-player.play_waveform_async(frequency)
+# player.play_waveform_async(frequency)
 
 print("==========\naudio loaded\n==========\n") 
 
@@ -36,7 +36,7 @@ time.sleep(0.5)
 print("==========\nmicrophone loaded\n==========\n")
 
 # create plotter
-plotter = Plotter(RATE, CHUNK, (frequency-1000, frequency+1000), (0, 20))
+plotter = Plotter(RATE, CHUNK, (frequency-1000, frequency+1000), (0, 0.5))
 time.sleep(0.2)
 
 print("==========\nplotloaded\n==========\n")
