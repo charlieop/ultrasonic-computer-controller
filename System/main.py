@@ -31,15 +31,18 @@ stream = p.open(format=FORMAT,
                 rate=RATE,
                 input=True,
                 frames_per_buffer=CHUNK)
+time.sleep(0.5)
 
 print("==========\nmicrophone loaded\n==========\n")
 
 # create plotter
 plotter = Plotter(RATE, CHUNK, (frequency-1000, frequency+1000), (0, 20))
+time.sleep(0.2)
 
 print("==========\nplotloaded\n==========\n")
 
 analyzer = AudioAnalyzer(frequency, RATE, CHUNK, 9)
+time.sleep(0.2)
 
 print("==========\nanalyzer loaded\n==========\n")
 
@@ -54,6 +57,7 @@ def pre_processing(audio_data, window):
     mag_data = np.abs(fft_data)[:CHUNK//2]
     
     return mag_data
+time.sleep(0.1)
 
 print("==========\nstart\n==========\n")
 
