@@ -1,7 +1,7 @@
 from audioPlayer import AudioPlayer
 from plotter import Plotter
 from dataAnalyzer import AudioAnalyzer
-from DirClassifier import DirClassifier
+from dirClassifier import DirClassifier
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ RATE = 44100
 CHUNK = 1024
 FREQUENCY_MAIN = 20000
 FREQUENCY_OTHER = 18000
-USE_ML = True
+USE_ML = False
 RoI = 7
 # create Hamming window
 window = np.hamming(CHUNK)

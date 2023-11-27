@@ -1,6 +1,7 @@
 import numpy as np
 import time
-from DirClassifier import DirClassifier
+from dirClassifier import DirClassifier
+from computerController import Presets, ConputerController
 
 class Gesture:
     def __init__(self):
@@ -11,6 +12,7 @@ class Gesture:
             "secondUp": False
             }
         self.lastMovedTime = time.time()
+        self.controller = ConputerController(Presets.WEB)
     def reset(self):
         self.state = {
             "firstDown": False,
@@ -21,13 +23,19 @@ class Gesture:
     def printResult(self):
         if self.state["firstDown"] and self.state["firstUp"] and self.state["secondDown"] and self.state["secondUp"]:
             print("double tap")
+            self.makeAction("double tap")
         elif self.state["firstDown"] and self.state["firstUp"]:
             print("single tap")
+            self.makeAction("single tap")
         elif self.state["firstDown"]:
             print("down")
+            self.makeAction("down")
         elif self.state["firstUp"]:
             print("up")
+            self.makeAction("up")
         print("\n==========")
+    def makeAction(self, gesture):
+        self.controller.makeAction(gesture)
         
 
 class AudioAnalyzer:
@@ -116,12 +124,18 @@ class AudioAnalyzer:
                     
             if down1 and up1 and down2 and up2 and down3 and up3:
                 print("triple tap")
+                self.gesture.makeAction("triple tap")
             elif down1 and up1 and down2 and up2:
                 print("double tap")
+                self.gesture.makeAction("double tap")
             elif down1 and up1:
                 print("single tap")
+                self.makeAction("single tap")
             else:
-                print(max(self.log, key=self.log.count))
+                gest = max(self.log, key=self.log.count)
+                print(gest)
+                self.gesture.makeAction(gest)
+                
             self.log = []
             self.inDetection = False   
     def detectFirstMovement(self, mag_data, rangeOfInterest):
