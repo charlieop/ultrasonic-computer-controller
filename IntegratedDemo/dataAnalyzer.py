@@ -1,5 +1,6 @@
 import numpy as np
 import time
+from DirClassifier import DirClassifier
 
 class Gesture:
     def __init__(self):
@@ -30,22 +31,31 @@ class Gesture:
         
 
 class AudioAnalyzer:
-    def __init__(self, frequency, rate, chunk, radiusOfInterest):
+    def __init__(self, frequency, rate, chunk, radiusOfInterest, otherFrequency = 0, useML = True):
+        self.otherFrequency = otherFrequency
+        self.targetIndexofOther = int(self.otherFrequency / rate * chunk)
+        self.targetIndex = int(frequency / rate * chunk)
         self.frequency = frequency
         self.chunk = chunk
         self.rate = rate
         self.radiusOfInterest = radiusOfInterest
-        self.targetIndex = int(frequency / rate * chunk)
+        self.useML = False
+        self.useML = useML
+        if useML:
+            self.predictor = DirClassifier()
+            self.label_thres = 0.08
+            self.log = []
 
         self.gesture = Gesture()
         self.inDetection = False
         self.existMovement = False
-
+        
         
     def analyze(self, mag_data):
+        if self.useML:
+            self.analyzeWithML(mag_data)
+            return
         rangeOfInterest = mag_data[self.targetIndex - self.radiusOfInterest : self.targetIndex + self.radiusOfInterest+1]
-        
-        
         
         if self.inDetection:
             self.checkFollowUpMovement(rangeOfInterest)
@@ -57,9 +67,63 @@ class AudioAnalyzer:
             
         else:
             self.detectFirstMovement(mag_data, rangeOfInterest)
-            
-                
     
+    def analyzeWithML(self, mag_data):
+        
+        rangeOfInterestMain = mag_data[self.targetIndex - self.radiusOfInterest : self.targetIndex + self.radiusOfInterest+1]
+        rangeOfInterestOther = mag_data[self.targetIndexofOther - self.radiusOfInterest : self.targetIndexofOther + self.radiusOfInterest+1]
+        if len(rangeOfInterestMain) < self.radiusOfInterest * 2 + 1 or len(rangeOfInterestOther) < self.radiusOfInterest * 2 + 1:
+            print("not yet ready")
+            return
+        
+        left_avg_Main = np.clip(np.average(rangeOfInterestMain[0: self.radiusOfInterest-2]), -0.5, 0.5)
+        right_avg_Main = np.clip(np.average(rangeOfInterestMain[self.radiusOfInterest+3: -1]), -0.5, 0.5)
+        left_avg_Other = np.clip(np.average(rangeOfInterestOther[0: self.radiusOfInterest-2]), -0.5, 0.5)
+        right_avg_Other = np.clip(np.average(rangeOfInterestOther[self.radiusOfInterest+3: -1]), -0.5, 0.5)
+        
+        diffMain = (right_avg_Main - left_avg_Main)
+        diffOther = (right_avg_Other - left_avg_Other)
+        diff_Main_Other = (diffOther - diffMain)
+
+        if (np.abs(diffMain) > self.label_thres) | (np.abs(diffOther) > self.label_thres) | (np.abs(diff_Main_Other) > self.label_thres):
+            if not self.inDetection:
+                print("==========movement========")
+                self.inDetection = True
+            res = self.predictor.get_class(diffOther, diffMain, diff_Main_Other)
+            self.log.append(res[0])
+            self.gesture.lastMovedTime = time.time()
+        elif time.time() - self.gesture.lastMovedTime > 0.3 and self.inDetection:
+            print("\n", self.log, "\n")
+            down1 = False
+            up1 = False
+            down2 = False
+            up2 = False
+            down3 = False
+            up3 = False
+            for i in self.log:
+                if i == "down":
+                    down1 = True
+                if down1 and i == "up":
+                    up1 = True
+                if up1 and i == "down":
+                    down2 = True
+                if down2 and i == "up":
+                    up2 = True
+                if up2 and i == "down":
+                    down3 = True
+                if down3 and i == "up":
+                    up3 = True
+                    
+            if down1 and up1 and down2 and up2 and down3 and up3:
+                print("triple tap")
+            elif down1 and up1 and down2 and up2:
+                print("double tap")
+            elif down1 and up1:
+                print("single tap")
+            else:
+                print(max(self.log, key=self.log.count))
+            self.log = []
+            self.inDetection = False   
     def detectFirstMovement(self, mag_data, rangeOfInterest):
         # if max(rangeOfInterest) < 1:
         #     print("speaker is off " + str(time.time()))

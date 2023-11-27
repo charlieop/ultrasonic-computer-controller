@@ -5,8 +5,8 @@ class DirClassifier:
 
     def __init__(self) -> None:
         
-        self.model = joblib.load("./IntegratedDemo/clf_svc.joblib")
-        self.le = joblib.load("./IntegratedDemo/le.joblib")
+        self.model = joblib.load("./IntegratedDemo/model/clf_svc.joblib")
+        self.le = joblib.load("./IntegratedDemo/model/le.joblib")
         self.co = 0.5
         self.label_thres = 0.1
 
