@@ -14,8 +14,8 @@ CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 FREQUENCY_MAIN = 20000
-FREQUENCY_OTHER = 18000
-USE_ML = False
+FREQUENCY_OTHER = 18000 
+USE_ML = True
 RoI = 7
 # create Hamming window
 window = np.hamming(CHUNK)
