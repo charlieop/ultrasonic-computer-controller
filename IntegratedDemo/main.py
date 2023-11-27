@@ -1,6 +1,7 @@
 from audioPlayer import AudioPlayer
 from plotter import Plotter
 from dataAnalyzer import AudioAnalyzer
+from DirClassifier import DirClassifier
 import pyaudio
 import numpy as np
 import matplotlib.pyplot as plt
@@ -47,6 +48,11 @@ time.sleep(0.2)
 
 print("==========\nanalyzer loaded\n==========\n")
 
+predictor = DirClassifier()
+time.sleep(0.2)
+
+print("==========\nmodel loaded\n==========\n")
+
 def pre_processing(audio_data, window):
     # apply Hamming window to audio data
     audio_data = audio_data * window
@@ -62,10 +68,9 @@ time.sleep(0.1)
 
 # testing
 targetIndexOf18k = int(18000 / RATE * CHUNK)
-radiusOfInterestof18k = 12
-thresholdOf18k = 0.01
+radiusOfInterestof18k = 7
 targetIndexOf20k = int(20000 / RATE * CHUNK)
-radiusOfInterestof20k = 12
+radiusOfInterestof20k = 7
 left_log = np.array([])
 right_log = np.array([])
 left_log_20k = np.array([])
@@ -76,6 +81,10 @@ log20k = []
 
 print("==========\nstart\n==========\n")
 
+last_time = time.time()
+inMovement = False
+log = []
+label_thres = 0.08
 # start recording and plotting
 while True:
     # read audio data from stream
@@ -86,25 +95,63 @@ while True:
     plotter.draw(mag_data)
     
     # process data
-    analyzer.analyze(mag_data)
-    
+    # analyzer.analjnyze(mag_data)
     
     rangeOfInterestof20k = mag_data[targetIndexOf20k- radiusOfInterestof20k : targetIndexOf20k + radiusOfInterestof20k+1]
-    left = np.average(rangeOfInterestof20k[0: radiusOfInterestof20k-2])
-    right = np.average(rangeOfInterestof20k[radiusOfInterestof20k+3: -1])
-    left_log_20k = np.append(left_log_20k, left)
-    right_log_20k = np.append(right_log_20k, right)
-
-    log20k.append(rangeOfInterestof20k)
+    left_avg_20k = np.clip(np.average(rangeOfInterestof20k[0: radiusOfInterestof20k-2]), -0.5, 0.5)
+    right_avg_20k = np.clip(np.average(rangeOfInterestof20k[radiusOfInterestof20k+3: -1]), -0.5, 0.5)
     
     rangeOfInterestof18k = mag_data[targetIndexOf18k- radiusOfInterestof18k : targetIndexOf18k + radiusOfInterestof18k+1]
-    right = np.average(rangeOfInterestof18k[0: radiusOfInterestof18k-2])
-    left = np.average(rangeOfInterestof18k[radiusOfInterestof18k+3: -1])
-    left_log = np.append(left_log, left)
-    right_log = np.append(right_log, right)
+    left_avg_18k = np.clip(np.average(rangeOfInterestof18k[0: radiusOfInterestof18k-2]), -0.5, 0.5)
+    right_avg_18k = np.clip(np.average(rangeOfInterestof18k[radiusOfInterestof18k+3: -1]), -0.5, 0.5)
+    
+    diff18k = (right_avg_18k - left_avg_18k)
+    diff20k = (right_avg_20k - left_avg_20k)
+    diff20k_18k = (diff18k - diff20k)
+        
+
+    if (np.abs(diff18k) > label_thres) | (np.abs(diff20k) > label_thres) | (np.abs(diff20k_18k) > label_thres):
+        if not inMovement:
+            print("==========movement========")
+            inMovement = True
+        res = predictor.get_class(diff18k, diff20k, diff20k_18k)
+        log.append(res[0])
+        last_time = time.time()
+    elif time.time() - last_time > 0.5 and inMovement:
+        print("\n")
+        down1 = False
+        up1 = False
+        down2 = False
+        up2 = False
+        for i in range(len(log)):
+            if log[i] == "down":
+                down1 = True
+            if down1 and log[i] == "up":
+                up1 = True
+            if up1 and log[i] == "down":
+                down2 = True
+            if down2 and log[i] == "up":
+                up2 = True
+        if down1 and up1 and down2 and up2:
+            print("double tap")
+        elif down1 and up1:
+            print("single tap")
+        else:
+            print(f"value: {log}\nmax: {max(log, key=log.count)}" )
+        log = []
+        inMovement = False
+    
+        
+    left_log_20k = np.append(left_log_20k, left_avg_20k)
+    right_log_20k = np.append(right_log_20k, right_avg_20k)
+
+    log20k.append(rangeOfInterestof20k)
+
+    left_log = np.append(left_log, left_avg_18k)
+    right_log = np.append(right_log, right_avg_18k)
     
     log18k.append(rangeOfInterestof18k)
-
+    
     # stop the loop if the plot is closed
     if not plt.fignum_exists(plotter.fig.number):
         break
