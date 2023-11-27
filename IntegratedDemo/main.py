@@ -13,14 +13,14 @@ CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 frequency = 20000
-    # create Hamming window
+# create Hamming window
 window = np.hamming(CHUNK)
 
 print("\n\n==========\ninitiallizing...\n==========\n")
 
 # start playing the single frequency sound
 player = AudioPlayer()
-player.play_waveform_async(frequency)
+player.play_waveform_async( frequency)
 
 print("==========\naudio loaded\n==========\n") 
 
@@ -62,14 +62,17 @@ time.sleep(0.1)
 
 # testing
 targetIndexOf18k = int(18000 / RATE * CHUNK)
-radiusOfInterestof18k = 10
+radiusOfInterestof18k = 12
 thresholdOf18k = 0.01
 targetIndexOf20k = int(20000 / RATE * CHUNK)
-radiusOfInterestof20k = 10
+radiusOfInterestof20k = 12
 left_log = np.array([])
 right_log = np.array([])
 left_log_20k = np.array([])
 right_log_20k = np.array([])
+
+log18k = []
+log20k = []
 
 print("==========\nstart\n==========\n")
 
@@ -87,21 +90,20 @@ while True:
     
     
     rangeOfInterestof20k = mag_data[targetIndexOf20k- radiusOfInterestof20k : targetIndexOf20k + radiusOfInterestof20k+1]
-    right = np.average(rangeOfInterestof20k[0: radiusOfInterestof20k-3])
-    left = np.average(rangeOfInterestof20k[radiusOfInterestof20k+4: 2*radiusOfInterestof20k+1])
+    left = np.average(rangeOfInterestof20k[0: radiusOfInterestof20k-2])
+    right = np.average(rangeOfInterestof20k[radiusOfInterestof20k+3: -1])
     left_log_20k = np.append(left_log_20k, left)
     right_log_20k = np.append(right_log_20k, right)
+
+    log20k.append(rangeOfInterestof20k)
     
     rangeOfInterestof18k = mag_data[targetIndexOf18k- radiusOfInterestof18k : targetIndexOf18k + radiusOfInterestof18k+1]
-    right = np.average(rangeOfInterestof18k[0: radiusOfInterestof18k-3])
-    left = np.average(rangeOfInterestof18k[radiusOfInterestof18k+4: 2*radiusOfInterestof18k+1])
+    right = np.average(rangeOfInterestof18k[0: radiusOfInterestof18k-2])
+    left = np.average(rangeOfInterestof18k[radiusOfInterestof18k+3: -1])
     left_log = np.append(left_log, left)
     right_log = np.append(right_log, right)
     
-    if (left-right > thresholdOf18k):
-        print("left")
-    elif (right-left > thresholdOf18k):
-        print("right")
+    log18k.append(rangeOfInterestof18k)
 
     # stop the loop if the plot is closed
     if not plt.fignum_exists(plotter.fig.number):
@@ -136,5 +138,19 @@ if not os.path.exists(file_path):
     open(file_path, 'w').close()
 np.save("datas/right_20k.npy", right_log_20k)
 print("right.npy saved")
+
+log18k = np.array(log18k)
+file_path = os.path.join(directory, "log18k.npy")
+if not os.path.exists(file_path):
+    open(file_path, 'w').close()
+np.save("datas/log18k.npy", log18k)
+print(f"log18k.npy saved. shape: {log18k.shape}")
+
+log20k = np.array(log20k)
+file_path = os.path.join(directory, "log20k.npy")
+if not os.path.exists(file_path):
+    open(file_path, 'w').close()
+np.save("datas/log20k.npy", log20k)
+print(f"log20k.npy saved. shape: {log20k.shape}")
 
 player.close()
