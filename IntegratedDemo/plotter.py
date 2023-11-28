@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import threading
 
 class Plotter:
     def __init__(self, rate, chunk, xlim, ylim):
@@ -15,11 +16,10 @@ class Plotter:
         plt.ion()
         plt.show()
         self.fig.canvas.draw()
-    
+        self.lock = threading.Lock()
 
     def draw(self, mag_data):
-        self.dots.set_offsets(np.column_stack((self.freqs[:self.CHUNK // 2], mag_data)))
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
-        
-    
+        with self.lock:
+            self.dots.set_offsets(np.column_stack((self.freqs[:self.CHUNK // 2], mag_data)))
+            self.fig.canvas.draw()
+            self.fig.canvas.flush_events()
