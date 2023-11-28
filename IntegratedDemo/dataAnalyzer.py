@@ -4,7 +4,8 @@ from dirClassifier import DirClassifier
 from computerController import Presets, ConputerController
 
 class Gesture:
-    def __init__(self):
+    def __init__(self, isPi = False):
+        self.isPi = isPi
         self.state = {
             "firstDown": False,
             "firstUp": False,
@@ -23,19 +24,19 @@ class Gesture:
     def printResult(self):
         if self.state["firstDown"] and self.state["firstUp"] and self.state["secondDown"] and self.state["secondUp"]:
             print("double tap")
-            self.makeAction("double tap")
+            self.makeAction("double tap", self.isPi)
         elif self.state["firstDown"] and self.state["firstUp"]:
             print("single tap")
-            self.makeAction("single tap")
+            self.makeAction("single tap", self.isPi)
         elif self.state["firstDown"]:
             print("down")
-            self.makeAction("down")
+            self.makeAction("down", self.isPi)
         elif self.state["firstUp"]:
             print("up")
-            self.makeAction("up")
+            self.makeAction("up", self.isPi)
         print("\n==========")
-    def makeAction(self, gesture):
-        self.controller.makeAction(gesture)
+    def makeAction(self, gesture, isPi = False):
+        self.controller.makeAction(gesture, isPi)
         
 
 class AudioAnalyzer:
@@ -49,12 +50,13 @@ class AudioAnalyzer:
         self.radiusOfInterest = radiusOfInterest
         self.useML = False
         self.useML = useML
+        self.isPi = isPi
         if useML:
             self.predictor = DirClassifier(isPi)
             self.label_thres = 0.08
             self.log = []
 
-        self.gesture = Gesture()
+        self.gesture = Gesture(isPi)
         self.inDetection = False
         self.existMovement = False
         
@@ -124,17 +126,17 @@ class AudioAnalyzer:
                     
             if down1 and up1 and down2 and up2 and down3 and up3:
                 print("triple tap")
-                self.gesture.makeAction("triple tap")
+                self.gesture.makeAction("triple tap", self.isPi)
             elif down1 and up1 and down2 and up2:
                 print("double tap")
-                self.gesture.makeAction("double tap")
+                self.gesture.makeAction("double tap", self.isPi)
             elif down1 and up1:
                 print("single tap")
-                self.gesture.makeAction("single tap")
+                self.gesture.makeAction("single tap", self.isPi)
             else:
                 gest = max(self.log, key=self.log.count)
                 print(gest)
-                self.gesture.makeAction(gest)
+                self.gesture.makeAction(gest, self.isPi)
                 
             self.log = []
             self.inDetection = False   

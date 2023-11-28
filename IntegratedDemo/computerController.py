@@ -12,8 +12,8 @@ CLICK = lambda: pyautogui.click()
 
 class Presets:
     YOUTUBE = {
-        "up": ((SCROLL, 5),),
-        "down": ((SCROLL, -5),),
+        "up": ((PRESS, "up"),),
+        "down": ((PRESS, "down"),),
         "left": ((PRESS, "left"),),
         "right": ((PRESS, "right"),),
         "single tap": ((NO_ACTION, None),),
@@ -37,14 +37,16 @@ class ConputerController:
         self.presets = presets
     def changePreset(self, presets):
         self.presets = presets
-    def makeAction(self, gesture):
+    def makeAction(self, gesture, isPi):
         action = self.presets[gesture]
         if action is None:
             return
         for item in action:
             func, param = item  # Unpack the tuple into function and parameter
             if param is None:
-                func()
+                if not isPi:
+                    func()
             print("the action is", param)
-            func(param)  # Call the function with the parameter
+            if not isPi:
+                func(param)  # Call the function with the parameter
             
