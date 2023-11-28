@@ -8,21 +8,21 @@ import matplotlib.pyplot as plt
 import time
 import os
 
-" constants "
+" config "
 isPi = False
+USE_ML = True   # True: use ML model to classify, False: use threshold to classify
 display = True
+SHOW_PERFORMANCE = False
+target_runs_per_second = 999
+
 FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 FREQUENCY_MAIN = 20000
 FREQUENCY_OTHER = 18000 
-USE_ML = True   # True: use ML model to classify, False: use threshold to classify
 RoI = 7
-# create Hamming window
 window = np.hamming(CHUNK)
-# Define the desired minimum number of runs per second
-target_runs_per_second = 999
 
 # Calculate the target interval between each iteration (in seconds)
 target_interval = 1 / target_runs_per_second
@@ -66,17 +66,11 @@ print("==========\nplotloaded\n==========\n")
 print("==========\nloading analyzer...\n==========\n")
 analyzer = None
 if not isPi:
-    analyzer = AudioAnalyzer(FREQUENCY_MAIN, RATE, CHUNK, RoI, FREQUENCY_OTHER, USE_ML)
+    analyzer = AudioAnalyzer(FREQUENCY_MAIN, RATE, CHUNK, RoI, FREQUENCY_OTHER, USE_ML, isPi)
 else:
-    analyzer = AudioAnalyzer(FREQUENCY_MAIN, RATE, CHUNK, RoI)
+    analyzer = AudioAnalyzer(FREQUENCY_MAIN, RATE, CHUNK, RoI, FREQUENCY_OTHER, USE_ML, isPi)
 time.sleep(0.2)
-print("==========\nanalyzer loaded\n==========\n")
-
-
-predictor = DirClassifier()
-time.sleep(0.2)
-print("==========\nmodel loaded\n==========\n")
-
+print("==========\nanalyzer loaded\n==========\ n")
 
 def pre_processing(audio_data, window):
     # apply Hamming window to audio data
@@ -88,12 +82,13 @@ def pre_processing(audio_data, window):
     return mag_data
 
 
-# testing
-targetIndexOf18k = int(18000 / RATE * CHUNK)
-radiusOfInterestof18k = 7
-targetIndexOf20k = int(20000 / RATE * CHUNK)
-radiusOfInterestof20k = 7
+"testing"
+# targetIndexOf18k = int(18000 / RATE * CHUNK)
+# radiusOfInterestof18k = 7
+# targetIndexOf20k = int(20000 / RATE * CHUNK)
+# radiusOfInterestof20k = 7
 
+"logging"
 # left_log = np.array([])
 # right_log = np.array([])
 # left_log_20k = np.array([])
@@ -120,7 +115,8 @@ while True:
     # record performance
     c += 1
     if time.time() - start_record_time > 1:
-        print(c)
+        if SHOW_PERFORMANCE:
+            print(c)
         c = 0
         start_record_time = time.time()
 

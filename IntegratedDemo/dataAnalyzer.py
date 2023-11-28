@@ -39,7 +39,7 @@ class Gesture:
         
 
 class AudioAnalyzer:
-    def __init__(self, frequency, rate, chunk, radiusOfInterest, otherFrequency = 0, useML = True):
+    def __init__(self, frequency, rate, chunk, radiusOfInterest, otherFrequency = 0, useML = True, isPi = False):
         self.otherFrequency = otherFrequency
         self.targetIndexofOther = int(self.otherFrequency / rate * chunk)
         self.targetIndex = int(frequency / rate * chunk)
@@ -50,7 +50,7 @@ class AudioAnalyzer:
         self.useML = False
         self.useML = useML
         if useML:
-            self.predictor = DirClassifier()
+            self.predictor = DirClassifier(isPi)
             self.label_thres = 0.08
             self.log = []
 

@@ -12,8 +12,8 @@ CLICK = lambda: pyautogui.click()
 
 class Presets:
     YOUTUBE = {
-        "up": ((PRESS, "up"),),
-        "down": ((PRESS, "down"),),
+        "up": ((SCROLL, 5),),
+        "down": ((SCROLL, -5),),
         "left": ((PRESS, "left"),),
         "right": ((PRESS, "right"),),
         "single tap": ((NO_ACTION, None),),
@@ -22,8 +22,8 @@ class Presets:
     }
 
     WEB = {
-        "up": ((SCROLL, 5),),
-        "down": ((SCROLL, -5),),
+        "up": ((SCROLL, 7),),
+        "down": ((SCROLL, -7),),
         "left": ((KEY_DOWN, "shift"), (PRESS, "tab"), (KEY_UP, "shift"),),
         "right": ((PRESS, "tab"),),
         "single tap": ((PRESS, "space"),),
@@ -45,6 +45,6 @@ class ConputerController:
             func, param = item  # Unpack the tuple into function and parameter
             if param is None:
                 func()
-            print(param)
+            print("the action is", param)
             func(param)  # Call the function with the parameter
             
