@@ -9,18 +9,25 @@ import time
 import os
 
 " constants "
+isPi = False
+display = True
 FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 RATE = 44100
 CHUNK = 1024
 FREQUENCY_MAIN = 20000
 FREQUENCY_OTHER = 18000 
-USE_ML = True
+USE_ML = True   # True: use ML model to classify, False: use threshold to classify
 RoI = 7
 # create Hamming window
 window = np.hamming(CHUNK)
+# Define the desired minimum number of runs per second
+target_runs_per_second = 999
 
-isPi = False
+# Calculate the target interval between each iteration (in seconds)
+target_interval = 1 / target_runs_per_second
+start_record_time = time.time()
+
 
 print("\n\n==========\ninitiallizing...\n==========\n")
 
@@ -101,17 +108,43 @@ inMovement = False
 log = []
 label_thres = 0.08
 
+start_record_time = time.time()
+c = 0
+
 # start recording and plotting
 while True:
+    
+    # limit the number of runs per second
+    start_time = time.time()
+    
+    # record performance
+    c += 1
+    if time.time() - start_record_time > 1:
+        print(c)
+        c = 0
+        start_record_time = time.time()
+
     # read audio data from stream
     data = stream.read(CHUNK, exception_on_overflow=False)
     mag_data = pre_processing(np.frombuffer(data, dtype=np.float32), window)
     
     # update plot
-    plotter.draw(mag_data)
+    if not isPi and display:
+        plotter.draw(mag_data) 
+        
     # process data
     analyzer.analyze(mag_data)
     
+    # stop the loop if the plot is closed
+    if not plt.fignum_exists(plotter.fig.number):
+        break  
+    
+    # limit the number of runs per second
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    if elapsed_time < target_interval:
+        time.sleep(target_interval - elapsed_time)
+        
     '''
     rangeOfInterestof20k = mag_data[targetIndexOf20k- radiusOfInterestof20k : targetIndexOf20k + radiusOfInterestof20k+1]
     left_avg_20k = np.clip(np.average(rangeOfInterestof20k[0: radiusOfInterestof20k-2]), -0.5, 0.5)
@@ -159,19 +192,12 @@ while True:
     
     # left_log_20k = np.append(left_log_20k, left_avg_20k)
     # right_log_20k = np.append(right_log_20k, right_avg_20k)
-
     # log20k.append(rangeOfInterestof20k)
-
     # left_log = np.append(left_log, left_avg_18k)
     # right_log = np.append(right_log, right_avg_18k)
-    
     # log18k.append(rangeOfInterestof18k)
     
-    # stop the loop if the plot is closed
     
-    if not plt.fignum_exists(plotter.fig.number):
-        break  
-      
 # close audio stream and PyAudio object
 stream.stop_stream()
 stream.close()

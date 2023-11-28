@@ -7,7 +7,7 @@ PRESS = lambda key: pyautogui.press(key)
 KEY_DOWN = lambda key: pyautogui.keyDown(key)
 KEY_UP = lambda key: pyautogui.keyUp(key)
 SCROLL = lambda amount: pyautogui.vscroll(amount)
-NO_ACTION = lambda: None
+NO_ACTION = lambda prarm=None: None
 CLICK = lambda: pyautogui.click()
 
 class Presets:
@@ -17,7 +17,7 @@ class Presets:
         "left": ((PRESS, "left"),),
         "right": ((PRESS, "right"),),
         "single tap": ((NO_ACTION, None),),
-        "double tap": ((PRESS, "playpause"),),
+        "double tap": ((PRESS, "space"),),
         "triple tap": ((PRESS, "esc"),),
     }
 
@@ -45,5 +45,6 @@ class ConputerController:
             func, param = item  # Unpack the tuple into function and parameter
             if param is None:
                 func()
+            print(param)
             func(param)  # Call the function with the parameter
             

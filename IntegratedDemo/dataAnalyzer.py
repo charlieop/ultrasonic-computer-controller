@@ -12,7 +12,7 @@ class Gesture:
             "secondUp": False
             }
         self.lastMovedTime = time.time()
-        self.controller = ConputerController(Presets.WEB)
+        self.controller = ConputerController(Presets.YOUTUBE)
     def reset(self):
         self.state = {
             "firstDown": False,
@@ -130,7 +130,7 @@ class AudioAnalyzer:
                 self.gesture.makeAction("double tap")
             elif down1 and up1:
                 print("single tap")
-                self.makeAction("single tap")
+                self.gesture.makeAction("single tap")
             else:
                 gest = max(self.log, key=self.log.count)
                 print(gest)
