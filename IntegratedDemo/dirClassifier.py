@@ -4,11 +4,7 @@ import numpy as np
 class DirClassifier:
 
     def __init__(self, isPi) -> None:
-        path = None
-        if not isPi:
-            path = "./IntegratedDemo/model/clf_svc.joblib"
-        else:
-            path = "./IntegratedDemo/model/clf_svc_forPi.joblib"
+        path = "./IntegratedDemo/model/clf_svc.joblib"
         self.model = joblib.load(path)
         self.le = joblib.load("./IntegratedDemo/model/le.joblib")
         self.co = 0.5
