@@ -7,8 +7,14 @@ import matplotlib.pyplot as plt
 import time
 
 " config "
+'''
+use ml: true - mac vol: 4-5, ipad vol: half
+        true - mac vol: 1, ipad vol: 2
+        false - mac vol: 6
+'''
+
 isPi = False
-USE_ML = True   # True: use ML model to classify, False: use threshold to classify
+USE_ML = False  # True: use ML model to classify, False: use threshold to classify
 display = True
 SHOW_PERFORMANCE = False
 target_runs_per_second = 999
@@ -21,7 +27,7 @@ FREQUENCY_MAIN = 20000
 FREQUENCY_OTHER = 18000 
 RoI = 7
 window = np.hamming(CHUNK)
-
+ 
 # Calculate the target interval between each iteration (in seconds)
 target_interval = 1 / target_runs_per_second
 start_record_time = time.time()

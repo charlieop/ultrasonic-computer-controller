@@ -19,7 +19,11 @@ stream = p.open(format=FORMAT,
                 frames_per_buffer=CHUNK)
 
 # create Hamming window
-window = np.hamming(CHUNK)
+# window = np.hamming(CHUNK)
+# window = np.hanning(CHUNK)
+window = np.blackman(CHUNK)
+
+
 
 # plot settings
 plt.ion()  # turn on interactive mode
@@ -27,7 +31,7 @@ fig, ax = plt.subplots()
 line, = ax.plot([], [])
 ax.set_xlim(17000, 21000)
 # ax.set_xlim(0, min(RATE/2, 220009))
-ax.set_ylim(0,5)
+ax.set_ylim(0,3)
 ax.set_xlabel('Frequency (Hz)')
 ax.set_ylabel('Amplitude')
 fig.canvas.draw()

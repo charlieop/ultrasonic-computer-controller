@@ -30,6 +30,16 @@ class Presets:
         "double tap": ((PRESS, "enter"),),
         "triple tap": ((PRESS, "esc"),),
     }
+    
+    PRESENTATION = {
+        "up": ((PRESS, "up"),),
+        "down": ((PRESS, "down"),),
+        "left": ((NO_ACTION, None),),
+        "right": ((NO_ACTION, None),),
+        "single tap": ((NO_ACTION, None),),
+        "double tap": ((PRESS, "esc"),),
+        "triple tap": ((NO_ACTION, None),),
+    }
 
 
 class ConputerController:

@@ -13,7 +13,7 @@ class Gesture:
             "secondUp": False
             }
         self.lastMovedTime = time.time()
-        self.controller = ConputerController(Presets.YOUTUBE)
+        self.controller = ConputerController(Presets.PRESENTATION)
     def reset(self):
         self.state = {
             "firstDown": False,
